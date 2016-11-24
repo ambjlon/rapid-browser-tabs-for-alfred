@@ -2,6 +2,7 @@ Encoding.default_external = Encoding::UTF_8 if defined? Encoding
 
 require 'yaml'
 require 'fileutils'
+require 'uri'
 
 require File.expand_path('../alfred_feedback', __FILE__)
 require File.expand_path('../browser_tabs', __FILE__)
@@ -41,20 +42,14 @@ end
 
 # Search anchored to slashes, dashes, and underscores
 def tab_matches_url?(tab, q)
-  q1 = Regexp.escape(q)
-  search_regexp = /[\/_-]+.*#{Regexp.escape(q)}/u
-  (tab.url =~ search_regexp)  != nil
+  #f=File.new("/Users/didi/q.txt", "a")
+  #f.puts(URI::encode(q))
+  tab.url.downcase.include?URI::encode(q).downcase
 end
 
 # Search anchored to the start of words (including CamelCase)
 def tab_matches_title?(tab, q)
-  q.split().all? { |word|
-    search_regexp = /(\b|[\/\._-])#{Regexp.escape(word)}/ui
-
-    tab.title.downcase =~ search_regexp ||
-    # Break CamelCase words into their individual components and search
-    tab.title.gsub(/([a-z\d])([A-Z])/ui,'\1 \2').downcase =~ search_regexp
-  }
+  tab.title.downcase.include?q
 end
 
 def tab_matches_query?(tab, q)
